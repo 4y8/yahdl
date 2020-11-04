@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "lexer.h"
 
@@ -19,10 +20,24 @@ struct token unused_token;
 static struct token mktoken(unsigned int);
 static struct token mktide(char *);
 static struct token get_token(void);
+static char *lexf(int (*f)(int));
+static int keyword(char *);
+
 struct token next_token(void);
 void putback_token(struct token);
 void init_lexer(char *);
-static char *lexf(int (*f)(int));
+
+static struct token
+mktoken(unsigned int type)
+{
+	return (struct token){.type = type};
+}
+
+static struct token
+mktide(char *ide)
+{
+	return (struct token){.type = T_IDE, .ide = ide};
+}
 
 static char *
 lexf(int (*f)(int))
@@ -54,16 +69,35 @@ lexf(int (*f)(int))
 	return s;
 }
 
-static struct token
-mktoken(unsigned int type)
+static int
+keyword(char *s)
 {
-	return (struct token){.type = type};
-}
+	switch (*s) {
+	case 'c':
+		if (!strcmp(s + 1, "hip"))
+			return T_CHIP;
 
-static struct token
-mktide(char *ide)
-{
-	return (struct token){.type = T_IDE, .ide = ide};
+		break;
+	case 'e':
+		if (!strcmp(s + 1, "nd"))
+			return T_END;
+
+		break;
+	case 'i':
+		if (!strcmp(s + 1, "s"))
+			return T_IS;
+		else if (!strcmp(s + 1, "n"))
+			return T_IN;
+
+		break;
+
+	case 'o':
+		if (!strcmp(s + 1, "ut"))
+			return T_OUT;
+
+		break;
+	}
+	return -1;
 }
 
 static struct token
@@ -78,9 +112,14 @@ get_token(void)
 		ungetc(c, in_file);
 		char *ide;
 		char *s = (ide = malloc(256)) - 1;
+		int   type;
 		while (isalpha(c = getc(in_file)))
 			*(++s) = c;
 		*(s + 1) = '\0';
+		type     = keyword(ide);
+		if (type >= 0)
+			return mktoken(type);
+
 		return mktide(ide);
 	} else
 		switch (c) {
