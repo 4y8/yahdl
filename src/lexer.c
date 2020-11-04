@@ -13,13 +13,15 @@
 
 #include "lexer.h"
 
-FILE *in_file;
+FILE *       in_file;
+struct token unused_token;
 
 static struct token mktoken(unsigned int);
 static struct token mktide(char *);
 static struct token get_token(void);
-static struct token next_token(void);
-static void putback_token(struct token);
+struct token next_token(void);
+void putback_token(struct token);
+void init_lexer(char *);
 static char *lexf(int (*f)(int));
 
 static char *
@@ -74,6 +76,27 @@ get_token(void)
 		return mktoken(T_EOF);
 	else if (isalpha(c)) {
 		ungetc(c, in_file);
-		char *s;
-	}
+		char *ide;
+		char *s = (ide = malloc(256)) - 1;
+		while (isalpha(c = getc(in_file)))
+			*(++s) = c;
+		*(s + 1) = '\0';
+		return mktide(ide);
+	} else
+		switch (c) {
+		case ',': return mktoken(T_COMA);
+
+		case ' ':
+		case '\t':
+		case '\n': return get_token();
+
+		case ';': return mktoken(T_SEMI);
+
+		case ':':
+			if (getc(in_file) == '=')
+				return mktoken(T_EQU);
+
+		default:
+			exit(1);
+		}
 }
