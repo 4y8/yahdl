@@ -139,3 +139,30 @@ get_token(void)
 			exit(1);
 		}
 }
+
+struct token
+next_token(void)
+{
+	if (unused_token.type == T_EOF)
+		return get_token();
+	else {
+		struct token t = unused_token;
+		unused_token = mktoken(T_EOF);
+		return t;
+	}
+}
+
+void
+putback_token(struct token t)
+{
+	unused_token = t;
+}
+
+void
+init_lexer(char *f)
+{
+	in_file = fopen(f, "r");
+	if (!in_file)
+		exit(1);
+	unused_token = mktoken(T_EOF);
+}
