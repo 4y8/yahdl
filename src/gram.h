@@ -7,7 +7,7 @@ struct node {
 	}            type;
 	char *       name;
 	struct node *args;
-	int          nargs;
+	int          narg;
 };
 
 struct decl {
