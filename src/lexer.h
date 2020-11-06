@@ -3,9 +3,9 @@
 
 struct token {
 	enum {
-		T_END, T_IS, T_CHIP, T_IN, T_OUT,     /* Keywords */
+		T_END, T_IS, T_CHIP, T_IN, T_OUT,      /* Keywords */
 		T_IDE,
-		T_LPAR, TRPAR, T_COMA, T_EQU, T_SEMI, /* Symbols */
+		T_LPAR, T_RPAR, T_COMA, T_EQU, T_SEMI, /* Symbols */
 		T_EOF
 	}     type;
 	char *ide;

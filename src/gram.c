@@ -7,6 +7,8 @@ static struct node mknide(char *);
 static struct node mkngate(char *, int, struct node *);
 static struct decl mkdecl(char *, int, struct node *);
 
+static void assert(int);
+static int peek(int);
 static struct node get_node(void);
 
 struct decl *program(void);
@@ -34,6 +36,27 @@ mkdecl(char *name, int size, struct node *body)
 		             .size = size};
 }
 
+static void
+assert(int type)
+{
+	if (type != next_token().type)
+		exit(1);
+}
+
+static int
+peek(int type)
+{
+	struct token t;
+
+	t = next_token();
+	if (t.type == type)
+		return 1;
+	else {
+		putback_token(t);
+		return 0;
+	}
+}
+
 static struct node
 get_node(void)
 {
@@ -41,8 +64,25 @@ get_node(void)
 
 	t = next_token();
 	switch (t.type) {
-	case T_IDE:
+	case T_IDE: {
+		char *name = t.ide;
+		t = next_token();
+		if (t.type == T_LPAR) {
+			struct node *args;
+			int          narg = 0;
+			args = malloc(sizeof(struct node));
+			while (!peek(T_RPAR)) {
+				++narg;
+				args = realloc(args, narg * sizeof(struct node));
+				*(args + narg - 1) = get_node();
+			}
+			return mkngate(name, narg, args);
+		} else {
+			putback_token(t);
+			return mknide(name);
+		}
 		break;
+	}
 	default: exit(1);
 	}
 }
