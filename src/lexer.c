@@ -1,9 +1,7 @@
 /* Example:
- * chip and3 is
- *   in a, b, c;
- *   out o;
+ * chip and3(a, b, c) is
  *   o1 := and(a, b);
- *   o  := and(o1, c);
+ *   and(o1, c);
  * end and3
  */
 
@@ -86,14 +84,6 @@ keyword(char *s)
 	case 'i':
 		if (!strcmp(s + 1, "s"))
 			return T_IS;
-		else if (!strcmp(s + 1, "n"))
-			return T_IN;
-
-		break;
-
-	case 'o':
-		if (!strcmp(s + 1, "ut"))
-			return T_OUT;
 
 		break;
 	}

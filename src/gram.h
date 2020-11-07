@@ -10,10 +10,20 @@ struct node {
 	int          narg;
 };
 
-struct decl {
-	char *       name;
-	struct node *body;
-	int          size;
+struct assign {
+	char *      name;
+	struct node node;
 };
+
+struct decl {
+	char *         name;
+	int            size;
+	struct assign *body;
+	int            narg;
+	char **        args;
+	struct node    out;
+};
+
+struct decl *program(void);
 
 #endif // __GRAM_H

@@ -5,11 +5,12 @@
 
 static struct node mknide(char *);
 static struct node mkngate(char *, int, struct node *);
-static struct decl mkdecl(char *, int, struct node *);
+static struct decl mkdecl(char *, int, struct assign *, int, char **, struct node);
 
 static void assert(int);
 static int peek(int);
 static struct node get_node(void);
+static struct decl chip_decl(void);
 
 struct decl *program(void);
 
@@ -29,11 +30,15 @@ mkngate(char *name, int narg, struct node *args)
 }
 
 static struct decl
-mkdecl(char *name, int size, struct node *body)
+mkdecl(char *name, int size, struct assign *body, int narg, char **args,
+       struct node out)
 {
 	return (struct decl){.name = name,
+		             .size = size,
 		             .body = body,
-		             .size = size};
+		             .narg = narg,
+		             .args = args,
+		             .out  = out};
 }
 
 static void
