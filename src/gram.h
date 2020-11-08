@@ -24,6 +24,6 @@ struct decl {
 	struct node    out;
 };
 
-struct decl *program(void);
+struct decl *program(int *);
 
 #endif // __GRAM_H
