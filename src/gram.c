@@ -6,9 +6,11 @@
 static struct node mknide(char *);
 static struct node mkngate(char *, int, struct node *);
 static struct decl mkdecl(char *, int, struct assign *, int, char **, struct node);
+static struct assign mkassign(char *, struct node);
 
 static void assert(int);
 static int peek(int);
+static char *identifier(void);
 static struct node get_node(void);
 static struct decl chip_decl(void);
 
@@ -48,6 +50,18 @@ assert(int type)
 		exit(1);
 }
 
+static char *
+identifier(void)
+{
+	struct token t;
+
+	t = next_token();
+	if (t.type == T_IDE)
+		return t.ide;
+	else
+		exit(1);
+}
+
 static int
 peek(int type)
 {
@@ -80,14 +94,52 @@ get_node(void)
 				++narg;
 				args = realloc(args, narg * sizeof(struct node));
 				*(args + narg - 1) = get_node();
+				assert(T_COMA);
 			}
 			return mkngate(name, narg, args);
 		} else {
 			putback_token(t);
 			return mknide(name);
 		}
-		break;
 	}
 	default: exit(1);
 	}
+}
+
+static struct decl
+chip_decl(void)
+{
+	int            narg, size;
+	char **        args, *name;
+	struct node    out;
+	struct assign *body;
+
+	size = 0;
+	narg = 0;
+	assert(T_CHIP);
+	name = identifier();
+	assert(T_LPAR);
+	args = malloc(sizeof(char *));
+	while (!peek(T_RPAR)) {
+		++narg;
+		args = realloc(args, narg * sizeof(char *));
+		*(args + narg - 1) = identifier();
+		assert(T_COMA);
+	}
+	assert(T_IS);
+	body = malloc(sizeof(struct assign));
+	while (peek(T_LET)) {
+		char *      name;
+		struct node node;
+		++size;
+		body = realloc(body, narg * sizeof(struct assign));
+		name = identifier();
+		assert(T_EQU);
+		node = get_node();
+		assert(T_SEMI);
+	}
+	out = get_node();
+	assert(T_END);
+	assert(T_CHIP);
+	return mkdecl(name, size, body, narg, args, out);
 }

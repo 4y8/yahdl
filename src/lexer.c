@@ -1,6 +1,6 @@
 /* Example:
  * chip and3(a, b, c) is
- *   o1 := and(a, b);
+ *   let o1 = and(a, b);
  *   and(o1, c);
  * end and3
  */
@@ -86,6 +86,11 @@ keyword(char *s)
 			return T_IS;
 
 		break;
+	case 'l':
+		if (!strcmp(s + 1, "et"))
+			return T_LET;
+
+		break;
 	}
 	return -1;
 }
@@ -121,9 +126,8 @@ get_token(void)
 
 		case ';': return mktoken(T_SEMI);
 
-		case ':':
-			if (getc(in_file) == '=')
-				return mktoken(T_EQU);
+		case '=':
+			return mktoken(T_EQU);
 
 		default:
 			exit(1);

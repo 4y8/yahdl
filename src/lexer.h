@@ -3,7 +3,7 @@
 
 struct token {
 	enum {
-		T_END, T_IS, T_CHIP,                   /* Keywords */
+		T_END, T_IS, T_CHIP, T_LET,            /* Keywords */
 		T_IDE,
 		T_LPAR, T_RPAR, T_COMA, T_EQU, T_SEMI, /* Symbols */
 		T_EOF
