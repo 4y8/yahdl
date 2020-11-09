@@ -7,6 +7,8 @@
  * yyyyyyyyyyyyCALL jumps to the y'th word of memory
  * yyyyyyyyyyyyPUSH push y on the stack
  * yyyyyyyyyyyyLOAD pushes the y'th values on the stack
+ * ____________NAND pushes the result of a nand between the two elements on the
+ *                  top of the stack
  * ____________RET  returns from a subroutine called with call
  */
 
@@ -16,6 +18,7 @@ enum op_code {
 	OP_CALL = 0,
 	OP_PUSH,
 	OP_LOAD,
+	OP_NAND,
 	OP_RET
 };
 
