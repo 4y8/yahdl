@@ -18,7 +18,6 @@ struct token unused_token;
 static struct token mktoken(unsigned int);
 static struct token mktide(char *);
 static struct token get_token(void);
-static char *lexf(int (*f)(int));
 static int keyword(char *);
 
 struct token next_token(void);
@@ -35,36 +34,6 @@ static struct token
 mktide(char *ide)
 {
 	return (struct token){.type = T_IDE, .ide = ide};
-}
-
-static char *
-lexf(int (*f)(int))
-{
-	int   size, i, c;
-	char *s, *p;
-
-	i    = 0;
-	size = 256;
-	p    = (s = malloc(size)) - 1;
-
-	if (!s)
-		exit(1);
-
-	while (f(c = getc(in_file)) && c) {
-		/* Allocate more memory for the string if we've reached its limit. */
-		if (++i >= size) {
-			size += 256;
-			s     = realloc(s, size);
-			p     = s + i - 2;
-			if (!s)
-				exit(1);
-		}
-		*(++p) = c;
-	}
-	/* NUL-terminate the string. */
-	s[i] = 0;
-	ungetc(c, in_file);
-	return s;
 }
 
 static int

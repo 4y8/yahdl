@@ -1,9 +1,10 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "vm.h"
 
 struct stack stack         = {.p = 0};
-struct stack address_stack = {.p = 0};
+struct stack address_stack = {.p = 1, .stack = {[MAX_STACK_SIZE - 1] = -1}};
 
 static void push(short, struct stack *);
 static short pop(struct stack *);
@@ -13,31 +14,32 @@ short vm(int, short[]);
 static void
 push(short s, struct stack *stack)
 {
-	stack->stack[MAX_STACK_SIZE - (stack->p++)] = s;
+	stack->stack[MAX_STACK_SIZE - 1 - (stack->p++)] = s;
 }
 
 static short
 pop(struct stack *stack)
 {
-	return stack->stack[MAX_STACK_SIZE - (--stack->p)];
+	return stack->stack[MAX_STACK_SIZE - 1 - (--stack->p)];
 }
 
 short
 vm(int p, short mem[])
 {
-	while (p)
-		switch (mem[p] & 0xF) {
+	while (p >= 0)
+		switch (mem[p++] & 0xF) {
 		case OP_RET:
 			p = pop(&address_stack);
 			break;
-		case OP_NAND:
-			push(!(pop(&stack) & pop(&stack)), &stack);
+		case OP_NAND: {
+			push(~(pop(&stack) & pop(&stack)), &stack);
 			break;
+		}
 		case OP_PUSH:
-			push(mem[p] >> 4, &stack);
+			push(mem[p - 1] >> 4, &stack);
 			break;
 		case OP_LOAD:
-			push(mem[MAX_STACK_SIZE - stack.p + (mem[p] >> 4)],
+			push(stack.stack[MAX_STACK_SIZE - stack.p + (mem[p] >> 4)],
 			     &stack);
 			break;
 		case OP_CALL:
