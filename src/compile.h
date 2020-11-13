@@ -5,10 +5,15 @@
 
 struct ir {
 	enum {
-		IR_STACK, IR_GLOBAL, IR_GATE
+		IR_STACK, IR_GLOBAL, IR_OP, IR_GATE
 	}          type;
 	int        n;
 	struct ir *args;
+};
+
+struct env {
+	int    len;
+	char **elems;
 };
 
 short *compile(int, struct decl *);

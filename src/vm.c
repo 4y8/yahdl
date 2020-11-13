@@ -31,10 +31,9 @@ vm(int p, short mem[])
 		case OP_RET:
 			p = pop(&address_stack);
 			break;
-		case OP_NAND: {
+		case OP_NAND:
 			push(~(pop(&stack) & pop(&stack)), &stack);
 			break;
-		}
 		case OP_PUSH:
 			push(mem[p - 1] >> 4, &stack);
 			break;
