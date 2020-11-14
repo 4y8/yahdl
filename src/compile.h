@@ -11,6 +11,11 @@ struct ir {
 	struct ir *args;
 };
 
+struct decl_ir {
+	int        size;
+	struct ir *body;
+};
+
 struct env {
 	int    len;
 	char **elems;
