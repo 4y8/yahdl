@@ -5,6 +5,8 @@
 
 static void append_env(struct env *, char *);
 static int find_env(struct env, char *);
+static void push_env(struct env *);
+static void pop_env(struct env *);
 
 static struct ir node_to_ir(struct node, struct env);
 static struct decl_ir *decls_to_ir(int, struct decl *);
@@ -30,6 +32,18 @@ find_env(struct env env, char *s)
 	return -1;
 }
 
+static void
+push_env(struct env *env)
+{
+	append_env(env, "");
+}
+
+static void
+pop_env(struct env *env)
+{
+	--env->len;
+}
+
 static struct ir
 node_to_ir(struct node n, struct env env)
 {
@@ -37,8 +51,16 @@ node_to_ir(struct node n, struct env env)
 	case N_IDE:
 		return (struct ir){.type = IR_STACK, .n = find_env(env, n.name)};
 
-	case N_GATE:
-		break;
+	case N_GATE: {
+		struct ir e;
+		e.args = malloc(n.narg * sizeof(struct ir));
+		e.type = IR_GATE;
+		for (int i = 0; i < n.narg; ++i) {
+			e.args[i] = node_to_ir(n.args[i], env);
+			push_env(&env);
+		}
+		return e;
+	}
 	}
 }
 
