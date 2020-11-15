@@ -2,15 +2,20 @@
 #include <string.h>
 
 #include "compile.h"
+#include "vm.h"
 
 static void append_env(struct env *, char *);
 static int find_env(struct env, char *);
 static void push_env(struct env *);
 static void pop_env(struct env *);
 
+static int builtin(char *);
 static struct ir node_to_ir(struct node, struct env);
 static struct decl_ir *decls_to_ir(int, struct decl *);
-static short *compile_ir(int, struct ir *);
+
+static short *compile_ir(struct ir, int *);
+static short *compile_decl_ir(struct decl_ir, int *);
+static short *compile_decls_ir(struct decl_ir *);
 
 short *compile(int, struct decl *);
 
@@ -44,12 +49,30 @@ pop_env(struct env *env)
 	--env->len;
 }
 
+static int
+builtin(char *s)
+{
+	switch (*s) {
+	case 'n':
+		if (!strcmp(s + 1, "and"))
+			return OP_NAND;
+
+		break;
+	}
+	return -1;
+}
+
 static struct ir
 node_to_ir(struct node n, struct env env)
 {
 	switch (n.type) {
-	case N_IDE:
-		return (struct ir){.type = IR_STACK, .n = find_env(env, n.name)};
+	case N_IDE: {
+		int t = builtin(n.name);
+		if (t < 0)
+			t = find_env(env, n.name);
+		return (struct ir){.type = IR_STACK, .
+			           n     = t};
+	}
 
 	case N_GATE: {
 		struct ir e;
@@ -59,6 +82,9 @@ node_to_ir(struct node n, struct env env)
 			e.args[i] = node_to_ir(n.args[i], env);
 			push_env(&env);
 		}
+		/* May be unuseful */
+		for (int i = 0; i < n.narg; ++i)
+			pop_env(&env);
 		return e;
 	}
 	}
@@ -82,9 +108,33 @@ decls_to_ir(int len, struct decl *decls)
 		for (int j = 0; j < decls[i].narg; ++j)
 			append_env(&env, decl.args[j]);
 		for (int j = 0; j < decl.size; ++j) {
-			ir_decls[i].body[j] = node_to_ir(decl.body[j].node, env);
+			ir_decls[i].body[j] = node_to_ir(decl.body[j].node,
+			                                 env);
 			append_env(&env, decl.body[j].node.name);
 		}
 	}
 	return ir_decls;
+}
+
+static short *
+compile_ir(struct ir n, int *len)
+{
+	short *p;
+
+	len = 0;
+	switch (n.type) {
+	case IR_OP:
+		p    = malloc(sizeof(short));
+		*len = 1;
+		*p   = n.n;
+		break;
+	case IR_STACK:
+		p    = malloc(sizeof(short));
+		*len = 1;
+		*p   = (n.n << 4) | OP_LOAD;
+		break;
+	default:
+		break;
+	}
+	return p;
 }
