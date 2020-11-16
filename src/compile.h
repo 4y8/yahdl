@@ -8,6 +8,7 @@ struct ir {
 		IR_STACK, IR_GLOBAL, IR_OP, IR_GATE
 	}          type;
 	int        n;
+	int        narg;
 	struct ir *args;
 };
 

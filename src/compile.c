@@ -13,7 +13,7 @@ static int builtin(char *);
 static struct ir node_to_ir(struct node, struct env);
 static struct decl_ir *decls_to_ir(int, struct decl *);
 
-static short *compile_ir(struct ir, int *);
+static short *compile_ir(struct ir, int *, short *);
 static short *compile_decl_ir(struct decl_ir, int *);
 static short *compile_decls_ir(struct decl_ir *);
 
@@ -78,6 +78,7 @@ node_to_ir(struct node n, struct env env)
 		struct ir e;
 		e.args = malloc(n.narg * sizeof(struct ir));
 		e.type = IR_GATE;
+		e.narg = n.narg;
 		for (int i = 0; i < n.narg; ++i) {
 			e.args[i] = node_to_ir(n.args[i], env);
 			push_env(&env);
@@ -117,24 +118,36 @@ decls_to_ir(int len, struct decl *decls)
 }
 
 static short *
-compile_ir(struct ir n, int *len)
+compile_ir(struct ir n, int *len, short *p)
 {
-	short *p;
-
-	len = 0;
 	switch (n.type) {
 	case IR_OP:
-		p    = malloc(sizeof(short));
-		*len = 1;
-		*p   = n.n;
+		p[*len] = n.n;
+		++(*len);
 		break;
 	case IR_STACK:
-		p    = malloc(sizeof(short));
-		*len = 1;
-		*p   = (n.n << 4) | OP_LOAD;
+		p[*len] = (n.n << 4) | OP_LOAD;
+		++(*len);
+		break;
+	case IR_GATE:
+		for (int i = 0; i < n.narg; ++i)
+			compile_ir(n.args[i], len, p);
+
+		p[*len] = OP_CALL | n.n;
+		++(*len);
+		p[*len] = OP_RES;
+		++(*len);
+
 		break;
 	default:
 		break;
 	}
 	return p;
+}
+
+static short *
+compile_decl_ir(struct decl_ir d, int *len)
+{
+	for (int i = 0; i < d.size; ++i) {
+	}
 }

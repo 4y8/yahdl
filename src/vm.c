@@ -5,6 +5,7 @@
 
 struct stack stack         = {.p = 0};
 struct stack address_stack = {.p = 1, .stack = {[MAX_STACK_SIZE - 1] = -1}};
+short        ret;
 
 static void push(short, struct stack *);
 static short pop(struct stack *);
@@ -27,9 +28,10 @@ short
 vm(int p, short mem[])
 {
 	while (p >= 0)
-		switch (mem[p++] & 0xF) {
+		switch ((enum op_code)(mem[p++] & 0xF)) {
 		case OP_RET:
-			p = pop(&address_stack);
+			p   = pop(&address_stack);
+			ret = pop(&stack);
 			break;
 		case OP_NAND:
 			push(~(pop(&stack) & pop(&stack)), &stack);
@@ -38,12 +40,19 @@ vm(int p, short mem[])
 			push(mem[p - 1] >> 4, &stack);
 			break;
 		case OP_LOAD:
-			push(stack.stack[MAX_STACK_SIZE - stack.p + (mem[p] >> 4)],
+			push(stack.stack[MAX_STACK_SIZE - stack.p +
+			                 (mem[p] >> 4)],
 			     &stack);
 			break;
 		case OP_CALL:
 			push(p, &address_stack);
 			p = mem[p] >> 4;
+			break;
+		case OP_POP:
+			(void)pop(&stack);
+			break;
+		case OP_RES:
+			push(ret, &stack);
 			break;
 		}
 	return pop(&stack);
