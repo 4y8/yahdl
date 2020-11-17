@@ -13,9 +13,9 @@ static int builtin(char *);
 static struct ir node_to_ir(struct node, struct env);
 static struct decl_ir *decls_to_ir(int, struct decl *);
 
-static short *compile_ir(struct ir, int *, short *);
-static short *compile_decl_ir(struct decl_ir, int *);
-static short *compile_decls_ir(struct decl_ir *);
+static void compile_ir(struct ir, int *, short *);
+static void compile_decl_ir(struct decl_ir, int *, short *);
+static void compile_decls_ir(int, struct decl_ir *, int *, short *);
 
 short *compile(int, struct decl *);
 
@@ -117,7 +117,7 @@ decls_to_ir(int len, struct decl *decls)
 	return ir_decls;
 }
 
-static short *
+static void
 compile_ir(struct ir n, int *len, short *p)
 {
 	switch (n.type) {
@@ -142,12 +142,18 @@ compile_ir(struct ir n, int *len, short *p)
 	default:
 		break;
 	}
-	return p;
 }
 
-static short *
-compile_decl_ir(struct decl_ir d, int *len)
+static void
+compile_decl_ir(struct decl_ir d, int *len, short *p)
 {
 	for (int i = 0; i < d.size; ++i) {
+		compile_ir(d.body[i], len, p);
+		p[*len] = OP_RES;
+		++(*len);
 	}
+	p[*len] = OP_RES;
+	++(*len);
+	p[*len] = OP_RET;
+	++(*len);
 }
