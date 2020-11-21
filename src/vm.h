@@ -33,4 +33,4 @@ struct stack {
 
 short vm(int, short[]);
 
-#endif // __VM_H
+#endif // vm.h

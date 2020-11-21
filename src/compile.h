@@ -24,4 +24,4 @@ struct env {
 
 short *compile(int, struct decl *);
 
-#endif // __LEXER_H
+#endif // compile.h

@@ -26,4 +26,4 @@ struct decl {
 
 struct decl *program(int *);
 
-#endif // __GRAM_H
+#endif // gram.h

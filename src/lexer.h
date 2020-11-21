@@ -15,4 +15,4 @@ struct token next_token(void);
 void putback_token(struct token);
 void init_lexer(char *);
 
-#endif // __LEXER_H
+#endif // lexer.h
