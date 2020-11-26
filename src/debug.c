@@ -18,6 +18,7 @@ static char *tokens[T_EOF + 1] = {
 void show_token(struct token *);
 void show_node(struct node *);
 void show_decl(struct decl *);
+void show_assign(struct assign *);
 void show_ir(struct ir *);
 void show_decl_ir(struct decl_ir *);
 void show_asm(short *);
@@ -39,12 +40,9 @@ show_node(struct node *n)
 		printf("identifier: %s", n->name);
 		break;
 	case N_GATE:
-		printf("gate: %s, [", n->name);
-		for (int i = 0; i < n->narg; ++i) {
-			show_node(n->args + i);
-			if (i < n->narg - 1) printf(", ");
-		}
-		printf("]");
+		printf("gate: %s, ", n->name);
+		printf("args: ");
+		show_list((void (*)(void *))show_node, n->narg, n->args);
 		break;
 	}
 }
@@ -52,6 +50,23 @@ show_node(struct node *n)
 void
 show_decl(struct decl *d)
 {
+	printf("declaration: %s\n", d->name);
+	printf("args: ");
+	show_list((void (*)(void *))printf, d->narg, d->args);
+	printf("\n");
+	printf("body: ");
+	show_list((void (*)(void *))show_assign, d->size, d->body);
+	printf("\n");
+	printf("return: ");
+	show_node(&d->out);
+	printf("\n");
+}
+
+void
+show_assign(struct assign *a)
+{
+	printf("variable: %s, equal: ", a->name);
+	show_node(&a->node);
 }
 
 void
@@ -72,6 +87,10 @@ show_asm(short *s)
 void
 show_list(void (*f)(void *), int n, void *l)
 {
-	for (int i = 0; i < n; ++i)
+	printf("[");
+	for (int i = 0; i < n; ++i) {
 		f(l + i);
+		if (i != n - 1) printf(", ");
+	}
+	printf("]");
 }
