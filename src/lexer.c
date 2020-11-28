@@ -81,6 +81,7 @@ get_token(void)
 			*(++s) = c;
 		*(s + 1) = '\0';
 		type     = keyword(ide);
+		ungetc(c, in_file);
 		if (type >= 0)
 			return mktoken(type);
 
@@ -97,6 +98,12 @@ get_token(void)
 
 		case '=':
 			return mktoken(T_EQU);
+
+		case '(':
+			return mktoken(T_LPAR);
+
+		case ')':
+			return mktoken(T_RPAR);
 
 		default:
 			exit(1);
@@ -125,7 +132,9 @@ void
 init_lexer(char *f)
 {
 	in_file = fopen(f, "r");
-	if (!in_file)
+	if (!in_file) {
+		printf("Couldn't open file %s", f);
 		exit(1);
+	}
 	unused_token = mktoken(T_EOF);
 }

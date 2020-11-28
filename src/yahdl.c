@@ -2,11 +2,18 @@
 #include <stdio.h>
 
 #include "vm.h"
+#include "gram.h"
+#include "lexer.h"
+#include "compile.h"
+#include "debug.h"
 
 int
 main()
 {
-	short l[] = {OP_PUSH | (1 << 4), OP_PUSH | (1 << 4), OP_NAND, OP_RET};
+	struct decl *d;
+	int          len = 0;
 
-	printf("%d", vm(0, (short *)l) & 1);
+	init_lexer("tests/not.yahdl");
+	d = program(&len);
+	show_decl(d);
 }

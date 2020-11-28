@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "gram.h"
 #include "lexer.h"
@@ -74,12 +75,9 @@ peek(int type)
 	struct token t;
 
 	t = next_token();
-	if (t.type == type)
-		return 1;
-	else {
-		putback_token(t);
-		return 0;
-	}
+	putback_token(t);
+	if (t.type == type) return 1;
+	else return 0;
 }
 
 static struct node
@@ -100,8 +98,9 @@ get_node(void)
 				++narg;
 				args = realloc(args, narg * sizeof(struct node));
 				*(args + narg - 1) = get_node();
-				assert(T_COMA);
+				if (!peek(T_RPAR)) assert(T_COMA);
 			}
+			(void)next_token();
 			return mkngate(name, narg, args);
 		} else {
 			putback_token(t);
@@ -130,13 +129,15 @@ chip_decl(void)
 		++narg;
 		args = realloc(args, narg * sizeof(char *));
 		*(args + narg - 1) = identifier();
-		assert(T_COMA);
+		if (!peek(T_RPAR)) assert(T_COMA);
 	}
+	(void)next_token();
 	assert(T_IS);
 	body = malloc(sizeof(struct assign));
 	while (peek(T_LET)) {
 		char *      name;
 		struct node node;
+		(void)next_token();
 		++size;
 		body = realloc(body, size * sizeof(struct assign));
 		name = identifier();
