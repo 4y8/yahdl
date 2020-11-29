@@ -15,6 +15,8 @@ static char *tokens[T_EOF + 1] = {
 	[T_EOF]  = "EOF"
 };
 
+static void prop(char *);
+
 void show_string(char **);
 void show_token(struct token *);
 void show_node(struct node *);
@@ -25,6 +27,12 @@ void show_decl_ir(struct decl_ir *);
 void show_asm(short *);
 
 void show_list(void (*)(void *), int, void *, size_t);
+
+static void
+prop(char *p)
+{
+	printf("\"%s\":", p);
+}
 
 void
 show_string(char **s)
@@ -42,31 +50,40 @@ show_token(struct token *t)
 void
 show_node(struct node *n)
 {
+	printf("{");
 	switch (n->type) {
 	case N_IDE:
-		printf("{\"identifier\":\"%s\"}", n->name);
+		prop("identifier");
+		show_string(&n->name);
 		break;
 	case N_GATE:
-		printf("{\"gate\":{\"name\":\"%s\",", n->name);
-		printf("\"args\":");
+		prop("gate");
+		printf("{");
+		prop("name");
+		show_string(&n->name);
+		printf(",");
+		prop("args");
 		show_list((void (*)(void *))show_node, n->narg, n->args,
 		          sizeof(struct node));
-		printf("}}");
+		printf("}");
 		break;
 	}
+	printf("}");
 }
 
 void
 show_decl(struct decl *d)
 {
 	printf("{\"declaration\": {\"name\":\"%s\",", d->name);
-	printf("\"args\":");
+	prop("args");
 	show_list((void (*)(void *))show_string, d->narg, d->args,
 	          sizeof(char *));
-	printf(", \"body\":");
+	printf(",");
+	prop("body");
 	show_list((void (*)(void *))show_assign, d->size, d->body,
 	          sizeof(struct assign));
-	printf(",\"return\":");
+	printf(",");
+	prop("return");
 	show_node(&d->out);
 	printf("}}");
 }
@@ -81,6 +98,29 @@ show_assign(struct assign *a)
 void
 show_ir(struct ir *i)
 {
+	printf("{");
+	switch (i->type) {
+	case IR_STACK:
+		prop("stack");
+		printf("%d", i->n);
+		break;
+	case IR_GATE:
+		prop("gate");
+		printf("{");
+		prop("index");
+		printf("%d", i->n);
+		printf(",");
+		prop("args");
+		show_list((void (*)(void *))show_ir, i->narg, i->args,
+		          sizeof(struct ir));
+		printf("}");
+		break;
+	case IR_OP:
+		break;
+	case IR_GLOBAL:
+		break;
+	}
+	printf("}");
 }
 
 void
