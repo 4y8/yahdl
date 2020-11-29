@@ -4,6 +4,7 @@
 #include "lexer.h"
 #include "gram.h"
 #include "compile.h"
+#include "vm.h"
 
 static char *tokens[T_EOF + 1] = {
 	[T_END]  = "keyword: end",  [T_IS]   = "keyword: is",
@@ -13,6 +14,12 @@ static char *tokens[T_EOF + 1] = {
 	[T_COMA] = "symbol: ,",     [T_EQU]  = "symbol: =",
 	[T_SEMI] = "symbol: ;",
 	[T_EOF]  = "EOF"
+};
+
+static char *instructions[OP_RET + 1] = {
+	[OP_CALL] = "call", [OP_PUSH] = "push", [OP_LOAD] = "load",
+	[OP_NAND] = "nand", [OP_POP]  = "pop",  [OP_RES]  = "res",
+	[OP_RET]  = "ret"
 };
 
 static void prop(char *);
@@ -126,11 +133,32 @@ show_ir(struct ir *i)
 void
 show_decl_ir(struct decl_ir *d)
 {
+	printf("{");
+	prop("declaration_ir");
+	printf("{");
+	prop("body");
+	show_list((void (*)(void *))show_ir, d->size, d->body,
+	          sizeof(struct ir));
+	printf("}");
+	printf("}");
 }
 
 void
 show_asm(short *s)
 {
+	printf("{");
+	prop("instruction");
+	show_string(&instructions[*s & 0b1111]);
+	switch ((enum op_code)(*s & 0b1111)) {
+	case OP_PUSH:
+		printf(",");
+		prop("value");
+		printf("%d", *s & 0b1111);
+		break;
+	default:
+		break;
+	}
+	printf("}");
 }
 
 void
