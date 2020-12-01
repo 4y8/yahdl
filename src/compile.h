@@ -22,6 +22,6 @@ struct env {
 	char **elems;
 };
 
-short *compile(int, struct decl *);
+void compile(int, struct decl *, int *, short *);
 
 #endif // compile.h

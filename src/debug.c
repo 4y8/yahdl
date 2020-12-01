@@ -150,6 +150,8 @@ show_asm(short *s)
 	prop("instruction");
 	show_string(&instructions[*s & 0b1111]);
 	switch ((enum op_code)(*s & 0b1111)) {
+	case OP_CALL:
+	case OP_LOAD:
 	case OP_PUSH:
 		printf(",");
 		prop("value");

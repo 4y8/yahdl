@@ -65,13 +65,15 @@ builtin(char *s)
 static struct ir
 node_to_ir(struct node n, struct env env)
 {
+	struct ir i;
+
 	switch (n.type) {
 	case N_IDE: {
 		int t = builtin(n.name);
 		if (t < 0)
 			t = find_env(env, n.name);
-		return (struct ir){.type = IR_STACK, .
-			           n     = t};
+		i = (struct ir){.type = IR_STACK, .
+			        n     = t};
 	}
 
 	case N_GATE: {
@@ -86,9 +88,10 @@ node_to_ir(struct node n, struct env env)
 		/* May be unuseful */
 		for (int i = 0; i < n.narg; ++i)
 			pop_env(&env);
-		return e;
+		i = e;
 	}
 	}
+	return i;
 }
 
 static struct decl_ir *
@@ -156,4 +159,20 @@ compile_decl_ir(struct decl_ir d, int *len, short *p)
 	++(*len);
 	p[*len] = OP_RET;
 	++(*len);
+}
+
+static void
+compile_decls_ir(int len, struct decl_ir *d, int *plen, short *p)
+{
+	for (int i = 0; i < len; ++i)
+		compile_decl_ir(d[i], plen, p);
+}
+
+void
+compile(int len, struct decl *d, int *plen, short *p)
+{
+	struct decl_ir *il;
+
+	decls_to_ir(len, d);
+	compile_decls_ir(len, il, plen, p);
 }
