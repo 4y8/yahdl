@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "compile.h"
 #include "vm.h"
@@ -17,7 +18,7 @@ static void compile_ir(struct ir, int *, short *);
 static void compile_decl_ir(struct decl_ir, int *, short *);
 static void compile_decls_ir(int, struct decl_ir *, int *, short *);
 
-short *compile(int, struct decl *);
+void compile(int, struct decl *, int *, short *);
 
 static void
 append_env(struct env *env, char *e)
@@ -73,7 +74,8 @@ node_to_ir(struct node n, struct env env)
 		if (t < 0)
 			t = find_env(env, n.name);
 		i = (struct ir){.type = IR_STACK, .
-			        n     = t};
+			        n     = env.len - t};
+		break;
 	}
 
 	case N_GATE: {
@@ -81,6 +83,7 @@ node_to_ir(struct node n, struct env env)
 		e.args = malloc(n.narg * sizeof(struct ir));
 		e.type = IR_GATE;
 		e.narg = n.narg;
+		e.n    = builtin(n.name);
 		for (int i = 0; i < n.narg; ++i) {
 			e.args[i] = node_to_ir(n.args[i], env);
 			push_env(&env);
@@ -89,6 +92,7 @@ node_to_ir(struct node n, struct env env)
 		for (int i = 0; i < n.narg; ++i)
 			pop_env(&env);
 		i = e;
+		break;
 	}
 	}
 	return i;
@@ -116,6 +120,7 @@ decls_to_ir(int len, struct decl *decls)
 			                                 env);
 			append_env(&env, decl.body[j].node.name);
 		}
+		ir_decls[i].body[decl.size] = node_to_ir(decl.out, env);
 	}
 	return ir_decls;
 }
@@ -136,7 +141,8 @@ compile_ir(struct ir n, int *len, short *p)
 		for (int i = 0; i < n.narg; ++i)
 			compile_ir(n.args[i], len, p);
 
-		p[*len] = OP_CALL | n.n;
+		//p[*len] = OP_CALL | n.n;
+		p[*len] = n.n;
 		++(*len);
 		p[*len] = OP_RES;
 		++(*len);
@@ -155,8 +161,6 @@ compile_decl_ir(struct decl_ir d, int *len, short *p)
 		p[*len] = OP_RES;
 		++(*len);
 	}
-	p[*len] = OP_RES;
-	++(*len);
 	p[*len] = OP_RET;
 	++(*len);
 }
@@ -173,6 +177,6 @@ compile(int len, struct decl *d, int *plen, short *p)
 {
 	struct decl_ir *il;
 
-	decls_to_ir(len, d);
+	il = decls_to_ir(len, d);
 	compile_decls_ir(len, il, plen, p);
 }

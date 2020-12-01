@@ -12,6 +12,6 @@ void show_ir(struct ir *);
 void show_decl_ir(struct decl_ir *);
 void show_asm(short *);
 
-void show_list(void (*)(void *), int, void *);
+void show_list(void (*)(void *), int, void *, size_t);
 
 #endif // debug.h

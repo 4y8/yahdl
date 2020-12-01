@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "debug.h"
+
 #include "lexer.h"
 #include "gram.h"
 #include "compile.h"

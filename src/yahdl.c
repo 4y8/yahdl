@@ -19,4 +19,5 @@ main()
 	d = program(&len);
 	show_decl(d);
 	compile(len, d, &plen, p);
+	show_list((void (*)(void *))show_asm, plen, p, sizeof(short));
 }
