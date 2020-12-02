@@ -11,7 +11,7 @@ static void push_env(struct env *);
 static void pop_env(struct env *);
 
 static int builtin(char *);
-static struct ir node_to_ir(struct node, struct env);
+static struct ir node_to_ir(struct node, struct env *);
 static struct decl_ir *decls_to_ir(int, struct decl *);
 
 static void compile_ir(struct ir, int *, short *);
@@ -64,7 +64,7 @@ builtin(char *s)
 }
 
 static struct ir
-node_to_ir(struct node n, struct env env)
+node_to_ir(struct node n, struct env *env)
 {
 	struct ir i;
 
@@ -72,9 +72,10 @@ node_to_ir(struct node n, struct env env)
 	case N_IDE: {
 		int t = builtin(n.name);
 		if (t < 0)
-			t = find_env(env, n.name);
+			t = find_env(*env, n.name);
 		i = (struct ir){.type = IR_STACK, .
-			        n     = env.len - t};
+			        n     = env->len - t};
+		push_env(env);
 		break;
 	}
 
@@ -86,11 +87,10 @@ node_to_ir(struct node n, struct env env)
 		e.n    = builtin(n.name);
 		for (int i = 0; i < n.narg; ++i) {
 			e.args[i] = node_to_ir(n.args[i], env);
-			push_env(&env);
+			push_env(env);
 		}
-		/* May be unuseful */
 		for (int i = 0; i < n.narg; ++i)
-			pop_env(&env);
+			pop_env(env);
 		i = e;
 		break;
 	}
@@ -117,10 +117,10 @@ decls_to_ir(int len, struct decl *decls)
 			append_env(&env, decl.args[j]);
 		for (int j = 0; j < decl.size; ++j) {
 			ir_decls[i].body[j] = node_to_ir(decl.body[j].node,
-			                                 env);
+			                                 &env);
 			append_env(&env, decl.body[j].node.name);
 		}
-		ir_decls[i].body[decl.size] = node_to_ir(decl.out, env);
+		ir_decls[i].body[decl.size] = node_to_ir(decl.out, &env);
 	}
 	return ir_decls;
 }
