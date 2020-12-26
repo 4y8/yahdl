@@ -18,8 +18,10 @@ static struct ir node_to_ir(struct node, struct env *, struct global_env *);
 static struct decl_ir *decls_to_ir(int, struct decl *, struct global_env *);
 
 static void compile_ir(struct ir, int *, short *);
-static void compile_decl_ir(struct decl_ir, int *, short *);
-static void compile_decls_ir(int, struct decl_ir *, int *, short *);
+static void compile_decl_ir(struct decl_ir, int *, short *,
+                            struct global_env *);
+static void compile_decls_ir(int, struct decl_ir *, int *, short *,
+                             struct global_env *);
 
 void compile(int, struct decl *, int *, short *, struct global_env *);
 
@@ -136,7 +138,8 @@ decls_to_ir(int len, struct decl *decls, struct global_env *genv)
 		decl        = decls[i];
 		ir_decls[i] = (struct decl_ir){
 			.body = malloc(decl.size + 1),
-			.size = decl.size + 1
+			.size = decl.size + 1,
+			.name = decl.name
 		};
 		struct env env = {.len   = 0,
 			          .elems = malloc(sizeof(char *))};
@@ -182,8 +185,11 @@ compile_ir(struct ir n, int *len, short *p)
 }
 
 static void
-compile_decl_ir(struct decl_ir d, int *len, short *p)
+compile_decl_ir(struct decl_ir d, int *len, short *p, struct global_env *genv)
 {
+	int beginning;
+
+	beginning = *len;
 	for (int i = 0; i < d.size; ++i) {
 		compile_ir(d.body[i], len, p);
 		p[*len] = OP_RES;
@@ -191,13 +197,15 @@ compile_decl_ir(struct decl_ir d, int *len, short *p)
 	}
 	p[*len] = OP_RET;
 	++(*len);
+	append_genv(genv, d.name, *len - beginning);
 }
 
 static void
-compile_decls_ir(int len, struct decl_ir *d, int *plen, short *p)
+compile_decls_ir(int len, struct decl_ir *d, int *plen, short *p,
+                 struct global_env *genv)
 {
 	for (int i = 0; i < len; ++i)
-		compile_decl_ir(d[i], plen, p);
+		compile_decl_ir(d[i], plen, p, genv);
 }
 
 void
@@ -206,5 +214,5 @@ compile(int len, struct decl *d, int *plen, short *p, struct global_env *genv)
 	struct decl_ir *il;
 
 	il = decls_to_ir(len, d, genv);
-	compile_decls_ir(len, il, plen, p);
+	compile_decls_ir(len, il, plen, p, genv);
 }

@@ -16,6 +16,7 @@ struct ir {
 struct decl_ir {
 	int        size;
 	struct ir *body;
+	char      *name;
 };
 
 struct env {
