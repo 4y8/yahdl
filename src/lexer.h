@@ -14,5 +14,6 @@ struct token {
 struct token next_token(void);
 void putback_token(struct token);
 void init_lexer(char *);
+void close_lexer(void);
 
 #endif // lexer.h

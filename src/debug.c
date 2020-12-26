@@ -157,7 +157,7 @@ show_asm(short *s)
 	case OP_PUSH:
 		printf(",");
 		prop("value");
-		printf("%d", *s & 0b1111);
+		printf("%d", *s >> 4);
 		break;
 	default:
 		break;

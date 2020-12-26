@@ -9,6 +9,7 @@ struct ir {
 	}          type;
 	int        n;
 	int        narg;
+	int        is_builtin;
 	struct ir *args;
 };
 
@@ -22,6 +23,15 @@ struct env {
 	char **elems;
 };
 
-void compile(int, struct decl *, int *, short *);
+struct global_env {
+	int len;
+	struct gelem {
+		char *s;
+		int pos;
+		int size;
+	} *elems;
+};
+
+void compile(int, struct decl *, int *, short *, struct global_env *);
 
 #endif // compile.h

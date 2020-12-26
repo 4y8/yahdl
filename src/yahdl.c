@@ -17,6 +17,7 @@ main()
 	p = malloc(1024 * sizeof(short));
 	init_lexer("tests/not.yahdl");
 	d = program(&len);
+	close_lexer();
 	show_decl(d);
 	compile(len, d, &plen, p);
 	show_list((void (*)(void *))show_asm, plen, p, sizeof(short));

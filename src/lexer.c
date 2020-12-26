@@ -138,3 +138,9 @@ init_lexer(char *f)
 	}
 	unused_token = mktoken(T_EOF);
 }
+
+void
+close_lexer(void)
+{
+	fclose(in_file);
+}
